@@ -109,8 +109,8 @@ int main(int argc, char** argv) {
   // get transformation
   tf2_ros::Buffer tfBuffer;
   tf2_ros::TransformListener tfListener(tfBuffer);
-  int j = 0;
-  int last_frame_integrated = 0;
+  unsigned int j = 0;
+  unsigned int last_frame_integrated = 0;
   while (ros::ok()) {
     bool res = depth_ptr->header.seq != last_frame_integrated;
 
