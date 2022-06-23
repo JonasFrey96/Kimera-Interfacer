@@ -65,12 +65,12 @@ def dl_mock():
   kimera_interfacer_path = rospack.get_path("kimera_interfacer")
 
   label_loader = LabelLoaderAuto(
-    root_scannet="/home/jonfrey/Datasets/scannet",
+    root_scannet="/media/jonfrey/Fieldtrip1/Jonas_Frey_Master_Thesis/scannet",
     confidence=rospy.get_param("~/dl_mock/prob_main"),
   )
 
   label_loader_aux = LabelLoaderAuto(
-    root_scannet="/home/jonfrey/Datasets/scannet",
+    root_scannet="/media/jonfrey/Fieldtrip1/Jonas_Frey_Master_Thesis/scannet",
     confidence=rospy.get_param("~/dl_mock/prob_aux"),
   )
 
@@ -126,6 +126,8 @@ def dl_mock():
 
   from pathlib import Path
 
+
+  print("Label scnene dir: ", label_scene_dir)
   label_paths = [str(s) for s in Path(label_scene_dir).rglob("*.png")]
   label_paths = [l for l in label_paths if l.find("_.png") == -1]
   label_paths = [l for l in label_paths if int(l.split("/")[-1][:-4]) % 10 == 0]
@@ -169,7 +171,7 @@ def dl_mock():
 
   integrated = 0
 
-  class Test(Dataset):
+  class DatasetLabels(Dataset):
     def __init__(self, aux, label_paths, depth_paths, image_paths, sub_reprojected):
       self.aux, self.label_paths, self.depth_paths, self.image_paths = (
         aux,
@@ -246,7 +248,7 @@ def dl_mock():
 
       return self.length
 
-  data = Test(
+  data = DatasetLabels(
     aux, label_paths, depth_paths, image_paths, sub_reprojected=sub_reprojected
   )
   dataloader = torch.utils.data.DataLoader(data, num_workers=8, shuffle=False)

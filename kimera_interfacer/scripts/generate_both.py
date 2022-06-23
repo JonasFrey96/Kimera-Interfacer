@@ -1,51 +1,24 @@
-import yaml
 import os
 import time
-with open("/home/jonfrey/ASL/cfg/exp/create_newlabels/create_labels_scene.yml") as file:
-  exp = yaml.load(file, Loader=yaml.FullLoader)
-  
-label_identifier = exp['label_generation']['identifier']
-scenes = exp['label_generation']['scenes']
-print(scenes, label_identifier)
+import argparse
 
-params = {  "prob_main": 0,
-            "label_identifier": label_identifier,
-            "fps": 5,
-            "prob_aux": 0
-          #, "frame_limit": 10
-}
-par = ""
-for k,v in params.items():
-  par += f" {k}:={v}  "
+if __name__ == "__main__":
+  parser = argparse.ArgumentParser()
+  parser.add_argument(
+    "--exp",
+    default="/home/jonfrey/ASL/cfg/exp/MA/scannet_self_supervision/create_labels_from_pretrained.yml",
+    help="The main experiment yaml file.",
+  )
+  args = parser.parse_args()
+  exp_cfg_path = args.exp
 
+  cmd = f"""/bin/bash -c " source ~/conda.sh && conda deactivate && conda deactivate && which python3 && cd /home/jonfrey/catkin_ws/src/Kimera-Interfacer/kimera_interfacer/scripts && /usr/bin/python3 generate_maps.py --exp="{exp_cfg_path}" " """
 
-label_generate_idtf = exp['label_generation']['identifier']+"_reprojected"
-output_dir = "/home/jonfrey/Datasets/output_kimera_semantics"
-
-
-for j,s in enumerate(scenes):
-  aux_labels = "invalid" # f"/home/jonfrey/Datasets/labels_generated/labels_deeplab/scans/{s}/labels_deeplab" #
-  cmd = f"roslaunch kimera_interfacer predict_generic_scene.launch scene:={s} aux_labels:={aux_labels}" + par
   print(cmd)
   os.system(cmd)
 
-  
-  args = {
-    "scannet_scene_dir" : f"/home/jonfrey/Datasets/scannet/scans/{s}",
-    "mesh_path": f"{output_dir}/{s}_{label_identifier}_predict_mesh.ply",
-    "map_serialized_path": f"{output_dir}/{s}_{label_identifier}_serialized.data",
-    "label_generate_idtf": label_generate_idtf,
-    "label_generate_dir": "/home/jonfrey/Datasets/labels_generated"
-  } 
-  args_str = ""
-  for k,v in args.items():
-    args_str += f"--{k}={v} "
+  time.sleep(5)
 
-
-  cmd = "/home/jonfrey/miniconda3/envs/track4/bin/python pseudo_labels/ray_cast_full_scene_simple.py "
-  cmd += args_str
+  cmd = f"""/bin/bash -c " cd /home/jonfrey/catkin_ws/src/Kimera-Interfacer/kimera_interfacer/scripts && source ~/conda.sh && /home/jonfrey/miniconda3/envs/track4/bin/python generate_labels.py --exp="{exp_cfg_path}" " """
   print(cmd)
-  os.system("cd /home/jonfrey/catkin_ws/src/Kimera-Interfacer/kimera_interfacer/scripts && " + cmd)
-  time.sleep(2)
-  
-
+  os.system(cmd)
